@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fantasy Glamour AI Generator</title>
+  <style>
+    :root{
+      --bg:#090911;
+      --panel:#121225;
+      --panel-2:#181833;
+      --line:#2d2d5b;
+      --text:#f5f2ff;
+      --muted:#b9b2d9;
+      --gold:#d8a84f;
+      --gold-2:#f3d48a;
+      --blue:#5b6cff;
+      --blue-2:#93a3ff;
+      --danger:#ff6b7d;
+      --good:#5dd6a2;
+      --shadow:0 18px 45px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(91,108,255,.25), transparent 28%),
+        radial-gradient(circle at top right, rgba(216,168,79,.18), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(166,99,255,.15), transparent 24%),
+        linear-gradient(180deg,#07070d 0%, #0d0d18 100%);
+      min-height:100vh;
+    }
+
+    .wrap{
+      max-width:1600px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .hero{
+      padding:24px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(24,24,51,.92), rgba(12,12,28,.95));
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:clamp(28px,4vw,46px);
+      line-height:1.05;
+      letter-spacing:.3px;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:1000px;
+      line-height:1.6;
+    }
+
+    .topbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin:18px 0 0;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:20px;
+    }
+
+    @media (max-width:1200px){
+      .main{grid-template-columns:1fr}
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(18,18,37,.95), rgba(10,10,22,.98));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-header{
+      padding:18px 20px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(90deg, rgba(91,108,255,.12), rgba(216,168,79,.10));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .panel-header h2{
+      margin:0;
+      font-size:20px;
+    }
+
+    .panel-body{
+      padding:18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:14px;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:700;
+      color:var(--gold-2);
+      letter-spacing:.2px;
+    }
+
+    select, textarea, input[type="text"], input[type="number"]{
+      width:100%;
+      border:1px solid #3b3b72;
+      background:#0d1020;
+      color:var(--text);
+      border-radius:12px;
+      padding:12px 12px;
+      font-size:14px;
+      outline:none;
+    }
+
+    textarea{
+      min-height:110px;
+      resize:vertical;
+      line-height:1.5;
+    }
+
+    input[type="range"]{
+      width:100%;
+      accent-color:var(--gold);
+    }
+
+    .range-wrap{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      align-items:center;
+    }
+
+    .range-value{
+      min-width:48px;
+      text-align:right;
+      color:var(--blue-2);
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      letter-spacing:.2px;
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+      color:#fff;
+      box-shadow:0 8px 20px rgba(0,0,0,.22);
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:linear-gradient(135deg, var(--gold), #b57e2f);
+      color:#1b1307;
+    }
+    .btn.secondary{
+      background:linear-gradient(135deg, var(--blue), #4957d9);
+    }
+    .btn.ghost{
+      background:linear-gradient(135deg, #2a2a52, #1b1b35);
+    }
+    .btn.danger{
+      background:linear-gradient(135deg, #b53b55, var(--danger));
+    }
+    .btn.good{
+      background:linear-gradient(135deg, #2a9970, var(--good));
+      color:#071a12;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .preset-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:end;
+      margin-bottom:16px;
+    }
+
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .outputs{
+      display:grid;
+      gap:18px;
+    }
+
+    .output-card{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+      overflow:hidden;
+    }
+
+    .output-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      background:linear-gradient(90deg, rgba(91,108,255,.08), rgba(216,168,79,.08));
+    }
+
+    .output-head h3{
+      margin:0;
+      font-size:17px;
+    }
+
+    .output-body{
+      padding:14px;
+    }
+
+    .output-body textarea{
+      min-height:280px;
+      background:#080a16;
+      border:1px solid #34346a;
+    }
+
+    .chip-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .chip{
+      padding:8px 10px;
+      font-size:12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      color:var(--blue-2);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .section-title{
+      margin:18px 0 12px;
+      font-size:16px;
+      color:#fff;
+    }
+
+    .footer-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Fantasy Glamour AI Generator</h1>
+      <p>
+        Build ultra-dramatic, gallery-worthy fantasy glamour prompts for both still images and cinematic video. Every generation includes
+        instructions for a <strong>distinct face, pose, and styling variation</strong> while keeping the same luxury celestial, Afrofuturist, high-end editorial aesthetic.
+      </p>
+      <div class="topbar chip-list">
+        <span class="chip">Photo Prompt Generator</span>
+        <span class="chip">Video Script Prompt Generator</span>
+        <span class="chip">15 Presets</span>
+        <span class="chip">Randomizer</span>
+        <span class="chip">Camera + Light + Shadow Controls</span>
+        <span class="chip">Copy + Clear All</span>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Generator Controls</h2>
+          <div class="toolbar">
+            <button class="btn primary" id="generateBtn">Generate Prompts</button>
+            <button class="btn secondary" id="randomBtn">Randomize</button>
+            <button class="btn danger" id="clearBtn">Clear All</button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="preset-row">
+            <div class="field">
+              <label for="presetSelect">Preset</label>
+              <select id="presetSelect"></select>
+            </div>
+            <button class="btn good" id="applyPresetBtn">Apply Preset</button>
+          </div>
+
+          <div class="section-title">Main Style Controls</div>
+          <div class="grid" id="dynamicFields"></div>
+
+          <div class="section-title">Camera Controls</div>
+          <div class="grid" id="cameraFields"></div>
+
+          <div class="section-title">Light + Shadow Controls</div>
+          <div class="grid" id="lightingFields"></div>
+
+          <div class="section-title">Creative Direction</div>
+          <div class="grid">
+            <div class="field">
+              <label for="subjectMatter">Subject Matter Theme</label>
+              <select id="subjectMatter">
+                <option>Fantasy Glamour</option>
+                <option>Celestial Couture</option>
+                <option>Cosmic Romance</option>
+                <option>Museum Masterpiece</option>
+                <option>Mythic Stage Presence</option>
+                <option>Surreal Time Goddess</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="outputMode">Output Mode</label>
+              <select id="outputMode">
+                <option>Generate Both</option>
+                <option>Photo Prompt Only</option>
+                <option>Video Prompt Only</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="aspectRatio">Aspect Ratio</label>
+              <select id="aspectRatio">
+                <option>9:16 vertical</option>
+                <option>4:5 portrait</option>
+                <option>1:1 square</option>
+                <option>16:9 widescreen</option>
+                <option>A4 poster portrait</option>
+                <option>Magazine cover vertical</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="duration">Video Duration (seconds)</label>
+              <input type="number" id="duration" min="3" max="30" value="8">
+            </div>
+
+            <div class="field" style="grid-column:1/-1;">
+              <label for="customNotes">Custom Notes / Extra Directions</label>
+              <textarea id="customNotes" placeholder="Add anything extra here. Example: Make it feel like the centerpiece of a sold-out gallery opening."></textarea>
+            </div>
+          </div>
+
+          <p class="footer-note">
+            Each dropdown has <strong>None first</strong>, and the remaining options are automatically alphabetized in the interface. The randomizer picks one option per dropdown. No chaos goblin behavior here.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Generated Outputs</h2>
+          <div class="toolbar">
+            <button class="btn ghost" id="copyPhotoBtn">Copy Photo Prompt</button>
+            <button class="btn ghost" id="copyVideoBtn">Copy Video Prompt</button>
+            <button class="btn secondary" id="copyBothBtn">Copy Both</button>
+          </div>
+        </div>
+
+        <div class="panel-body outputs">
+          <div class="output-card">
+            <div class="output-head">
+              <h3>Photo Prompt</h3>
+              <span class="tiny mono" id="photoMeta">Ready</span>
+            </div>
+            <div class="output-body">
+              <textarea id="photoOutput" placeholder="Your still-image prompt will generate here..."></textarea>
+            </div>
+          </div>
+
+          <div class="output-card">
+            <div class="output-head">
+              <h3>Video Script Prompt</h3>
+              <span class="tiny mono" id="videoMeta">Ready</span>
+            </div>
+            <div class="output-body">
+              <textarea id="videoOutput" placeholder="Your video script prompt will generate here..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NONE = "None";
+
+    function alpha(arr){
+      return [NONE, ...arr.slice().sort((a,b)=>a.localeCompare(b))];
+    }
+
+    const dropdownData = {
+      eyeColor: alpha([
+        "Amber", "Amethyst", "Aqua", "Black", "Blue", "Blue-green", "Bronze", "Champagne", "Copper", "Emerald",
+        "Golden Hazel", "Gray", "Honey", "Ice Blue", "Indigo", "Lavender", "Moonstone", "Olive", "Onyx",
+        "Pearl Gray", "Rose Gold", "Ruby", "Sapphire", "Seafoam", "Silver", "Smoky Quartz", "Topaz", "Violet", "Warm Brown"
+      ]),
+      hairStyle: alpha([
+        "Afro Crown", "Asymmetrical Bob", "Bantu Knots", "Braided Updo", "Butterfly Locs", "Cornrows", "Curly High Ponytail",
+        "Curly Pixie", "Dreadlock Halo", "Finger Waves", "Fulani Braids", "Goddess Braids", "Half-Up Half-Down", "High Bun",
+        "Hollywood Waves", "Knotless Braids", "Layered Curls", "Loc Bun", "Loose Waves", "Mohawk Updo", "Pinned Curls",
+        "Sculptural Updo", "Senegalese Twists", "Silk Press Straight", "Sleek Bob", "Sleek High Ponytail", "Soft Curls",
+        "Twisted Crown", "Wet Look Waves"
+      ]),
+      ethnicity: alpha([
+        "Afro-Caribbean", "African American", "Afrofuturist-inspired Black beauty", "Angolan", "Bahamian", "Barbadian",
+        "Belizean", "Black British", "Brazilian Afro-descendant", "Cameroonian", "Congolese", "Dominican Afro-Latina",
+        "East African", "Ethiopian", "Gambian", "Ghanaian", "Haitian", "Igbo Nigerian", "Ivorian", "Jamaican",
+        "Kenyan", "Nubian", "Senegalese", "Somali", "South African", "Sudanese", "Tanzanian", "Trinidadian", "West African"
+      ]),
+      hairColor: alpha([
+        "Auburn", "Blue-Black", "Burgundy", "Caramel Brown", "Cherry Cola", "Chestnut", "Copper", "Crimson", "Dark Brown",
+        "Deep Plum", "Emerald Black", "Espresso", "Golden Bronze", "Honey Blonde", "Jet Black", "Lavender Black",
+        "Mahogany", "Midnight Blue", "Mocha", "Onyx", "Pearl Silver", "Rose Gold", "Ruby Black", "Sapphire", "Silver",
+        "Smoky Gray", "Soft Black", "Violet Black", "Warm Brown"
+      ]),
+      hat: alpha([
+        "Beaded Halo Headpiece", "Celestial Crown", "Crystal Beret", "Draped Veil Headpiece", "Embroidered Pillbox Hat",
+        "Feathered Fascinator", "Floral Halo", "Gold Leaf Crown", "Jeweled Circlet", "Lace Veil Hat", "Metallic Headwrap",
+        "Moon Crown", "Orbital Headpiece", "Oversized Bow Hat", "Pearl Halo", "Plumed Fedora", "Satin Turban", "Sequined Hood",
+        "Sculptural Crown", "Silver Diadem", "Starburst Crown", "Structured Wide-Brim Hat", "Sunburst Halo", "Tall Couture Hat",
+        "Velvet Fascinator", "Vintage Cloche", "Wide-Brim Black Hat", "Winged Headpiece", "Woven Gold Halo"
+      ]),
+      hairGems: alpha([
+        "Aurora Crystals", "Beaded Pins", "Celestial Chains", "Chrome Hair Rings", "Crystal Constellations", "Diamond Dust Clips",
+        "Emerald Pins", "Feather Charms", "Floral Crystal Pins", "Gold Hair Rings", "Iridescent Beads", "Jeweled Hair Net",
+        "Lunar Pearls", "Metallic Threads", "Mini Butterflies", "Moon Charms", "Opal Clips", "Pearl Sprays", "Rhinestone Veil",
+        "Rose Crystal Pins", "Sapphire Pins", "Silver Chains", "Star Charms", "Sunburst Pins", "Tiny Bells", "Topaz Pins",
+        "Velvet Bows", "Violet Crystals", "Wire Halo Details"
+      ]),
+      shoes: alpha([
+        "Ankle Strap Heels", "Barefoot with Gold Anklets", "Blade Heels", "Cage Sandals", "Chrome Heels", "Crystal Pumps",
+        "Embellished Boots", "Feathered Heels", "Gold Platform Heels", "Jeweled Sandals", "Knee-High Boots", "Lace-Up Heels",
+        "Metallic Boots", "Mirror Heels", "Moonstone Heels", "Pearl Heels", "Pointed Pumps", "Satin Heels", "Sculptural Heels",
+        "Silver Stilettos", "Sky-High Platforms", "Stiletto Heels", "Strappy Gold Heels", "Studded Boots", "Thigh-High Boots",
+        "Velvet Pumps", "Wedge Sandals", "Winged Heels", "Wrapped Gladiator Heels"
+      ]),
+      outfit: alpha([
+        "Armored Corset Gown", "Asymmetrical Satin Gown", "Beaded Mermaid Dress", "Celestial Ball Gown", "Chain-Draped Dress",
+        "Chrome Bodysuit", "Corset Dress", "Couture Tailored Suit", "Crystal Fringe Gown", "Cutout Evening Gown",
+        "Draped Silk Dress", "Embellished Jumpsuit", "Feathered Corset Dress", "Fit and Flare Dress", "Gold-Threaded Gown",
+        "High-Slit Column Dress", "Iridescent Cape Dress", "Layered Organza Gown", "Metallic Corset Gown", "Off-Shoulder Corset Gown",
+        "Pleated Gown", "Ruffled Couture Dress", "Satin Blazer Dress", "Sequined Evening Gown", "Sheer Panel Gown",
+        "Structured Peplum Dress", "Velvet Corset Dress", "Voluminous Tulle Gown", "Wrapped Silk Gown"
+      ]),
+      cloak: alpha([
+        "Aurora Veil", "Beaded Cape", "Billowing Velvet Cloak", "Celestial Mantle", "Chain Cape", "Chiffon Train",
+        "Crystal Smoke Cape", "Draped Organza Cloak", "Embroidered Royal Cloak", "Feather Cape", "Floating Silk Panels",
+        "Glitter Tulle Train", "Gold Thread Shawl", "Holographic Veil", "Iridescent Cape", "Jeweled Cape", "Layered Tulle Mantle",
+        "Long Satin Cloak", "Metallic Winged Cape", "Moonlit Veil", "Orbital Ribbon Cloak", "Pearl Mesh Drape", "Rose Petal Train",
+        "Royal Brocade Cloak", "Shadow Silk Mantle", "Shimmer Chiffon Cape", "Starfall Veil", "Structured Cape", "Transparent Crystal Wrap"
+      ]),
+      flowers: alpha([
+        "Anemones", "Black Dahlias", "Blue Irises", "Calla Lilies", "Camellias", "Celestial Roses", "Cherry Blossoms", "Chrysanthemums",
+        "Coral Peonies", "Cosmic Orchids", "Dahlias", "Gardenias", "Ghost Roses", "Hibiscus", "Hydrangeas", "Iris Petals",
+        "Jasmine Clusters", "Lavender Blossoms", "Lotus Flowers", "Magnolias", "Moon Lilies", "Orchids", "Peonies", "Ranunculus",
+        "Roses", "Silver Petals", "Star Lilies", "Tulips", "White Lilies"
+      ]),
+      instruments: alpha([
+        "Cello", "Crystal Chimes", "Double Bass", "Electric Harp", "Flute", "French Horn", "Grand Piano", "Guitar", "Harp",
+        "Lute", "Lyre", "Mandolin", "Oboe", "Pipe Organ", "Saxophone", "Silver Violin", "Sitar", "Synth Harp", "Tambourine",
+        "Treble Clef Light Sculpture", "Trumpet", "Tuning Fork", "Viola", "Violin", "Vintage Microphone", "Wind Chimes", "Xylophone", "Zither", "Nocturne Bell"
+      ]),
+      lashes: alpha([
+        "3D Mink Lashes", "Anime Wispy Lashes", "Baby Doll Lashes", "Bold Glam Lashes", "Classic Flutter Lashes", "Cluster Lashes",
+        "Curled Volume Lashes", "Demi Wispy Lashes", "Doe-Eye Lashes", "Dramatic Cat-Eye Lashes", "Extra Long Feathered Lashes",
+        "Fox-Eye Lashes", "Full Volume Lashes", "Layered Silk Lashes", "Luxe Flutter Lashes", "Mega Volume Lashes", "Natural Wispy Lashes",
+        "Open Eye Lashes", "Piecey Glam Lashes", "Soft Editorial Lashes", "Spiked Glam Lashes", "Starburst Lashes", "Textured Volume Lashes",
+        "Thick Couture Lashes", "Thin Separated Lashes", "Velvet Lashes", "Wet Look Lashes", "Whisper Lashes", "Winged Lashes"
+      ]),
+      butterflies: alpha([
+        "Amethyst Butterflies", "Aurora Butterflies", "Black Velvet Butterflies", "Blue Morpho Butterflies", "Celestial Butterflies",
+        "Chrome Butterflies", "Crystal Butterflies", "Electric Blue Butterflies", "Ember Butterflies", "Galaxy Butterflies",
+        "Ghost Butterflies", "Glitter Butterflies", "Gold Butterflies", "Holographic Butterflies", "Iridescent Butterflies", "Jewel Butterflies",
+        "Lavender Butterflies", "Luminous Butterflies", "Midnight Butterflies", "Moonlit Butterflies", "Opal Butterflies", "Pearl Butterflies",
+        "Royal Blue Butterflies", "Shadow Butterflies", "Silver Butterflies", "Solar Butterflies", "Star Butterflies", "Velvet Indigo Butterflies", "Violet Butterflies"
+      ]),
+      elements: alpha([
+        "Astral Dust", "Aurora Smoke", "Celestial Rings", "Chrome Shards", "Clockwork Sparks", "Comet Trails", "Cosmic Mist", "Crystal Fog",
+        "Ember Trails", "Ethereal Ribbons", "Floating Feathers", "Galaxy Particles", "Glass Refractions", "Golden Sparks", "Halo Rays",
+        "Iridescent Smoke", "Lightning Threads", "Liquid Light", "Lunar Fog", "Mirror Fragments", "Moon Dust", "Nebula Clouds",
+        "Orbital Streaks", "Prism Flares", "Silver Glitter", "Solar Ash", "Starbursts", "Velvet Darkness", "Water Reflections"
+      ]),
+      accessories: alpha([
+        "Arm Cuffs", "Body Chain", "Cascading Earrings", "Chandelier Earrings", "Charm Bracelets", "Chest Ornament", "Choker Necklace",
+        "Chrome Bangles", "Cocktail Ring", "Crystal Anklets", "Crystal Collar", "Diamond Earrings", "Ear Cuffs", "Embroidered Gloves",
+        "Face Gems", "Finger Armor", "Gold Bangles", "Gold Hoop Earrings", "Jeweled Belt", "Layered Necklaces", "Opera Gloves",
+        "Pearl Collar", "Rhinestone Gloves", "Royal Sash", "Sculptural Brooch", "Shoulder Jewelry", "Statement Earrings", "Waist Chain", "Wrist Cuffs"
+      ]),
+      hairEdges: alpha([
+        "Airbrushed Swirls", "Art Deco Edges", "Baby Hair Loops", "Cloud Curl Edges", "Classic Sleek Edges", "Comma Swirls",
+        "Couture Finger Waves", "Crescent Swirls", "Crystal-Lined Edges", "Defined Glossy Edges", "Double Swoop Edges",
+        "Dramatic Sculpted Edges", "Feathered Baby Hairs", "Fine Curved Edges", "Glossed Curlicues", "Halo Sweep Edges",
+        "Heart Swirl Edges", "Laid Edges", "Minimal Sleek Edges", "Moon Curve Edges", "Petal Swirl Edges", "Ribbon Swirl Edges",
+        "Sharp Sculpted Edges", "Soft Brushed Edges", "Star Swirl Edges", "Statement Swoops", "Temple Spiral Edges", "Vintage Curl Edges", "Wet Shine Edges"
+      ]),
+      skinTone: alpha([
+        "Almond Brown", "Bronze Cocoa", "Caramel Glow", "Chestnut Brown", "Cinnamon Brown", "Cool Espresso", "Copper Brown", "Deep Auburn Brown",
+        "Deep Cocoa", "Deep Mahogany", "Ebony Gold", "Golden Brown", "Honey Bronze", "Mocha Brown", "Olive Bronze", "Rich Ebony",
+        "Rich Sable", "Soft Bronze", "Soft Caramel", "Sunlit Cocoa", "Toasted Almond", "Velvet Chestnut", "Warm Amber Brown", "Warm Beige Brown",
+        "Warm Bronze", "Warm Cocoa", "Warm Mahogany", "Walnut Brown", "Woodland Bronze"
+      ]),
+
+      /* Extra background controls to keep the environment suitable */
+      backgroundScene: alpha([
+        "Antique Clock Chamber", "Astral Palace", "Baroque Celestial Hall", "Celestial Cathedral", "Clockwork Garden", "Cosmic Ballroom",
+        "Crystal Observatory", "Dream Theater Stage", "Floating Museum Gallery", "Galaxy Atrium", "Gilded Moon Hall", "Grand Opera Void",
+        "Heavenly Reflection Room", "Iridescent Night Temple", "Luminous Floral Chamber", "Midnight Mirror Hall", "Moonlit Marble Room",
+        "Nebula Gallery Hall", "Ornate Time Portal", "Prism Light Chamber", "Royal Starlight Room", "Sacred Fashion Sanctuary", "Silver Horizon Stage",
+        "Starfall Runway", "Surreal Garden of Time", "Theater of Constellations", "Velvet Cosmos Room", "Victorian Time Palace", "Whispering Light Hall"
+      ]),
+      poseStyle: alpha([
+        "Arched Back Elegance", "Centered Command", "Forward Stride", "Graceful Lean", "Hand on Hip", "Head Tilted Back", "Kneeling Elegance",
+        "Looking Back", "Lounge Pose", "Over-the-Shoulder Gaze", "Profile Power Pose", "Raised Arm Drama", "Reclining Regal", "Runway Walk",
+        "Seated Throne Pose", "Side Profile Grace", "Soft Contrapposto", "Spiral Turn", "Stage-Step Pose", "Statuesque Front Pose", "Stoic Stillness",
+        "Swirling Dress Motion", "Three-Quarter Turn", "Tiptoe Lift", "Torso Twist", "Upward Gaze", "Veil Sweep Pose", "Walking Through Light", "Wide Stance Power"
+      ])
+    };
+
+    const cameraData = {
+      shotType: alpha([
+        "Aerial Hero Shot", "Close-Up Portrait", "Cropped Beauty Shot", "Dutch Angle Portrait", "Extreme Close-Up", "Full Body Hero Shot",
+        "Low Angle Full Body", "Medium Full Shot", "Overhead Cathedral Shot", "Panoramic Fashion Shot", "Profile Portrait", "Runway Mid Shot",
+        "Shoulder-Up Portrait", "Side Profile Crop", "Three-Quarter Portrait", "Tilted Editorial Shot", "Top-Down Detail Shot", "Waist-Up Shot",
+        "Wide Environmental Shot", "Full Vertical Poster", "Heroic Stage Shot", "Gallery Wall Shot", "Monumental Front Shot", "Mirror Reflection Shot",
+        "Centered Poster Shot", "Depth-Layered Wide Shot", "Iconic Cover Shot", "Symmetrical Hall Shot", "Floating Subject Shot"
+      ]),
+      cameraAngle: alpha([
+        "Center Eye Level", "Dutch Left", "Dutch Right", "Extreme Low Angle", "Eye Level", "Floor-Level Upward", "High Angle", "Low Angle", "Mid-Level Side Angle",
+        "Overhead", "Rear Three-Quarter", "Slightly High Front", "Slightly Low Front", "Straight-On", "Top-Down", "Under-Chin Hero Angle", "Wide Front Angle",
+        "Three-Quarter Left", "Three-Quarter Right", "Side Left", "Side Right", "Back View", "Back Three-Quarter", "Diagonal Front Left", "Diagonal Front Right",
+        "Diagonal Rear Left", "Diagonal Rear Right", "Tilted Overhead", "Stage-Level Front"
+      ]),
+      lens: alpha([
+        "24mm wide lens", "28mm wide lens", "35mm lens", "40mm lens", "50mm portrait lens", "55mm lens", "60mm lens", "70mm lens",
+        "85mm fashion lens", "100mm macro lens", "105mm portrait lens", "135mm telephoto lens", "16mm ultra wide lens", "18mm wide lens", "20mm wide lens",
+        "65mm medium telephoto", "75mm lens", "90mm portrait lens", "Anamorphic lens", "Cinematic prime lens", "Editorial portrait lens",
+        "Glass sharp studio lens", "Soft bloom portrait lens", "Telephoto compression lens", "Ultra clean beauty lens", "Wide dramatic lens", "Zoomed medium lens", "Macro detail lens", "Luxury campaign lens"
+      ]),
+      framing: alpha([
+        "Centered Symmetry", "Diagonal Energy", "Frame Within Frame", "Foreground Layering", "Hero Center Composition", "Image Heavy Left", "Image Heavy Right",
+        "Layered Depth Composition", "Negative Space Upper Half", "Off-Center Left", "Off-Center Right", "Perfect Symmetry", "Poster Cover Layout",
+        "Rule of Thirds Left", "Rule of Thirds Right", "Split Composition", "Stage Depth Layout", "Subject Dominant Center", "Tight Cropped Framing", "Triangular Composition",
+        "Vertical Monument Framing", "Wide Hall Framing", "Mirror Split Composition", "Cathedral Symmetry", "Clock Halo Composition", "Gallery Poster Layout", "Runway Centering", "Spiral Eye Flow", "Radiant Backdrop Framing"
+      ]),
+      motion: alpha([
+        "Camera Drift", "Camera Orbit", "Clock Glow Pulse", "Dress Flowing", "Floating Butterflies", "Fog Movement", "Forward Push-In", "Golden Sparks Swirling",
+        "Halo Expansion", "Hair Moving Slightly", "Light Sweep", "Orbital Spin", "Petals Drifting", "Reflection Ripples", "Ribbon Trails Curling",
+        "Slow Dolly In", "Slow Dolly Out", "Slow Pan Left", "Slow Pan Right", "Slow Tilt Up", "Slow Tilt Down", "Smoke Curling", "Spark Burst",
+        "Star Flicker", "Static Hero Shot", "Subtle Zoom", "Turntable Rotation", "Veil Floating", "Walking Forward"
+      ])
+    };
+
+    const lightingData = {
+      keyLight: alpha([
+        "Ambient Glow", "Beauty Dish", "Celestial Spotlight", "Chrome Bounce Light", "Cinematic Soft Key", "Cool Studio Key", "Diffused Gold Key", "Dreamy Cloud Light",
+        "Editorial Hard Key", "Even Beauty Light", "Firelit Glow", "Focused High Key", "Front Softbox", "Golden Spotlight", "Halo Key Light", "Heavenly Overhead Glow",
+        "Low-Key Spotlight", "Lunar Glow", "Mixed Color Key Light", "Moonlit Key", "Prism Light", "Reflective Metallic Light", "Rim-Lit Key", "Royal Stage Spotlight",
+        "Side Sculpting Light", "Soft Window Glow", "Starbeam Light", "Theatrical Key Light", "Velvet Darkness Key"
+      ]),
+      fillLight: alpha([
+        "Blue Fill", "Chrome Reflect Fill", "Cool Fill", "Deep Contrast Fill", "Dreamy Low Fill", "Editorial Fill", "Feathered Fill", "Front Fill", "Gentle Beauty Fill",
+        "Gold Bounce Fill", "High Fill", "Lavender Fill", "Left Fill", "Low Fill", "Luminous Fill", "Minimal Fill", "Moon Fill", "Neutral Fill", "No Fill",
+        "Pearl Fill", "Prism Fill", "Reflective Floor Fill", "Right Fill", "Silver Fill", "Soft Blue Fill", "Soft Gold Fill", "Subtle Cool Fill", "Warm Fill", "White Bounce Fill"
+      ]),
+      rimLight: alpha([
+        "Amber Rim Light", "Blue Rim Light", "Chrome Rim Light", "Cool Edge Rim", "Double Rim Light", "Electric Blue Rim", "Fiery Rim Light", "Gold Rim Light",
+        "Halo Rim Light", "Iridescent Rim", "Lavender Rim", "Lunar Rim", "Magenta Rim", "Moon White Rim", "Multi-Color Rim", "No Rim Light", "Opal Rim",
+        "Orange Rim Light", "Pearl Rim", "Platinum Rim", "Purple Rim", "Radiant Rim", "Rear White Rim", "Royal Blue Rim", "Silver Rim Light",
+        "Soft Gold Rim", "Star Rim", "Violet Rim", "Warm Sunset Rim"
+      ]),
+      shadowStyle: alpha([
+        "Airy Shadows", "Carved Shadows", "Clean Studio Shadows", "Clockwork Shadows", "Cool Blue Shadows", "Deep Cinematic Shadows", "Diffuse Shadows",
+        "Dramatic Hard Shadows", "Dreamy Soft Shadows", "Editorial Contrast Shadows", "Feathered Shadows", "Glossy Reflective Shadows", "Golden Shadows",
+        "High-Contrast Shadows", "Layered Shadows", "Low-Key Shadows", "Luminous Soft Shadows", "Mirror Floor Shadows", "Moody Velvet Shadows",
+        "Nebula Shadows", "Noir Shadows", "Painterly Shadows", "Pearlescent Shadows", "Prism Shadows", "Sculpted Face Shadows", "Silver Mist Shadows",
+        "Soft Contour Shadows", "Stage Spotlight Shadows", "Volumetric Shadows"
+      ])
+    };
+
+    const fieldsConfig = [
+      { id:"eyeColor", label:"Eye Color" },
+      { id:"hairStyle", label:"Hair Style" },
+      { id:"ethnicity", label:"Ethnicity" },
+      { id:"hairColor", label:"Hair Color" },
+      { id:"hat", label:"Hat / Headpiece" },
+      { id:"hairGems", label:"Hair Gems" },
+      { id:"shoes", label:"Shoes" },
+      { id:"outfit", label:"Outfit" },
+      { id:"cloak", label:"Cloak / Train" },
+      { id:"flowers", label:"Flowers" },
+      { id:"instruments", label:"Instruments / Music Element" },
+      { id:"lashes", label:"Lashes" },
+      { id:"butterflies", label:"Butterflies" },
+      { id:"elements", label:"Elements" },
+      { id:"accessories", label:"Accessories" },
+      { id:"hairEdges", label:"Hair Edges" },
+      { id:"skinTone", label:"Skin Tone" },
+      { id:"backgroundScene", label:"Background Scene" },
+      { id:"poseStyle", label:"Pose Style" }
+    ];
+
+    const cameraFieldsConfig = [
+      { id:"shotType", label:"Shot Type" },
+      { id:"cameraAngle", label:"Camera Angle" },
+      { id:"lens", label:"Lens" },
+      { id:"framing", label:"Framing" },
+      { id:"motion", label:"Motion" }
+    ];
+
+    const lightingFieldsConfig = [
+      { id:"keyLight", label:"Key Light" },
+      { id:"fillLight", label:"Fill Light" },
+      { id:"rimLight", label:"Rim Light" },
+      { id:"shadowStyle", label:"Shadow Style" }
+    ];
+
+    const sliderConfig = [
+      { id:"lightIntensity", label:"Light Intensity", min:0, max:100, value:78 },
+      { id:"contrastLevel", label:"Contrast", min:0, max:100, value:72 },
+      { id:"shadowDepth", label:"Shadow Depth", min:0, max:100, value:68 },
+      { id:"shadowSoftness", label:"Shadow Softness", min:0, max:100, value:44 },
+      { id:"glowAmount", label:"Glow / Bloom", min:0, max:100, value:70 },
+      { id:"reflectionAmount", label:"Reflection Amount", min:0, max:100, value:66 },
+      { id:"particleDensity", label:"Particle Density", min:0, max:100, value:62 },
+      { id:"backgroundComplexity", label:"Background Complexity", min:0, max:100, value:74 }
+    ];
+
+    const distinctFaceDescriptors = [
+      "defined jawline with regal cheekbone structure",
+      "soft oval face with commanding eyes and plush lips",
+      "heart-shaped face with elegant symmetry and sculpted brows",
+      "high-fashion angular face with deep-set luminous eyes",
+      "rounded glamour face with lifted features and glossy lips",
+      "long graceful face with dramatic cheek contour",
+      "striking editorial bone structure with powerful gaze",
+      "soft sculpted face with couture elegance and refined nose bridge",
+      "cinematic face shape with intense eyes and polished skin finish",
+      "luxury beauty symmetry with distinct brow arch and radiant expression"
+    ];
+
+    const distinctPoseDescriptors = [
+      "one hand lifting the brim while stepping forward with statuesque control",
+      "a poised three-quarter turn with flowing fabric and shoulder power",
+      "an elegant contrapposto stance with subtle motion in the hips and gown",
+      "a commanding runway pause with elongated limbs and deliberate posture",
+      "a graceful side-body twist with the dress trailing in motion",
+      "a centered heroic stance with strong vertical posture and lifted chin",
+      "a dramatic stride with one leg revealed through the slit and cloak in motion",
+      "a museum-still pose with sculptural elegance and controlled tension",
+      "a regal stop-motion moment as if captured mid-performance",
+      "a sensual yet powerful pose with balanced asymmetry and couture confidence"
+    ];
+
+    const distinctStylingDescriptors = [
+      "unique jewelry layering and fabric shimmer treatment",
+      "a fresh blend of celestial glamour and royal couture styling",
+      "a new arrangement of metallic accents and fantasy detailing",
+      "distinct surface textures with updated luxury ornament placement",
+      "custom floral and light interplay that changes the silhouette",
+      "a one-of-a-kind fashion finish with different embellishment balance",
+      "elevated editorial polish with altered accessory emphasis",
+      "customized color glints and material sheen variation",
+      "reimagined beauty styling with new visual rhythm and texture layering",
+      "singular couture detailing that keeps the same universe but changes the styling identity"
+    ];
+
+    const presets = [
+      {
+        name:"1. Time Queen",
+        values:{
+          eyeColor:"Silver", hairStyle:"Loc Bun", ethnicity:"Jamaican", hairColor:"Jet Black", hat:"Wide-Brim Black Hat",
+          hairGems:"Lunar Pearls", shoes:"Stiletto Heels", outfit:"Off-Shoulder Corset Gown", cloak:"Long Satin Cloak",
+          flowers:"Moon Lilies", instruments:"Treble Clef Light Sculpture", lashes:"Bold Glam Lashes", butterflies:"Electric Blue Butterflies",
+          elements:"Nebula Clouds", accessories:"Statement Earrings", hairEdges:"Feathered Baby Hairs", skinTone:"Deep Mahogany",
+          backgroundScene:"Antique Clock Chamber", poseStyle:"Statuesque Front Pose",
+          shotType:"Full Body Hero Shot", cameraAngle:"Low Angle", lens:"85mm fashion lens", framing:"Clock Halo Composition", motion:"Static Hero Shot",
+          keyLight:"Celestial Spotlight", fillLight:"Soft Gold Fill", rimLight:"Royal Blue Rim", shadowStyle:"Deep Cinematic Shadows"
+        },
+        sliders:{lightIntensity:82, contrastLevel:80, shadowDepth:74, shadowSoftness:38, glowAmount:76, reflectionAmount:72, particleDensity:68, backgroundComplexity:78}
+      },
+      {
+        name:"2. Butterfly Empress",
+        values:{
+          eyeColor:"Violet", hairStyle:"Butterfly Locs", ethnicity:"Haitian", hairColor:"Violet Black", hat:"Celestial Crown",
+          hairGems:"Mini Butterflies", shoes:"Winged Heels", outfit:"Layered Organza Gown", cloak:"Aurora Veil",
+          flowers:"Cosmic Orchids", instruments:"Harp", lashes:"Fox-Eye Lashes", butterflies:"Violet Butterflies",
+          elements:"Aurora Smoke", accessories:"Body Chain", hairEdges:"Art Deco Edges", skinTone:"Warm Bronze",
+          backgroundScene:"Surreal Garden of Time", poseStyle:"Veil Sweep Pose",
+          shotType:"Full Vertical Poster", cameraAngle:"Three-Quarter Left", lens:"50mm portrait lens", framing:"Radiant Backdrop Framing", motion:"Butterflies Floating",
+          keyLight:"Dreamy Cloud Light", fillLight:"Lavender Fill", rimLight:"Violet Rim", shadowStyle:"Dreamy Soft Shadows"
+        },
+        sliders:{lightIntensity:74, contrastLevel:64, shadowDepth:56, shadowSoftness:62, glowAmount:82, reflectionAmount:60, particleDensity:74, backgroundComplexity:82}
+      },
+      {
+        name:"3. Opera of Stars",
+        values:{
+          eyeColor:"Sapphire", hairStyle:"Hollywood Waves", ethnicity:"African American", hairColor:"Blue-Black", hat:"Tall Couture Hat",
+          hairGems:"Star Charms", shoes:"Crystal Pumps", outfit:"Beaded Mermaid Dress", cloak:"Beaded Cape",
+          flowers:"Roses", instruments:"Grand Piano", lashes:"Mega Volume Lashes", butterflies:"Royal Blue Butterflies",
+          elements:"Golden Sparks", accessories:"Chandelier Earrings", hairEdges:"Defined Glossy Edges", skinTone:"Rich Ebony",
+          backgroundScene:"Grand Opera Void", poseStyle:"Raised Arm Drama",
+          shotType:"Medium Full Shot", cameraAngle:"Center Eye Level", lens:"70mm lens", framing:"Poster Cover Layout", motion:"Slow Dolly In",
+          keyLight:"Royal Stage Spotlight", fillLight:"Gold Bounce Fill", rimLight:"Gold Rim Light", shadowStyle:"Stage Spotlight Shadows"
+        },
+        sliders:{lightIntensity:80, contrastLevel:76, shadowDepth:68, shadowSoftness:42, glowAmount:70, reflectionAmount:65, particleDensity:58, backgroundComplexity:75}
+      },
+      {
+        name:"4. Moonlit Museum",
+        values:{
+          eyeColor:"Moonstone", hairStyle:"Sculptural Updo", ethnicity:"Black British", hairColor:"Pearl Silver", hat:"Moon Crown",
+          hairGems:"Opal Clips", shoes:"Silver Stilettos", outfit:"Structured Peplum Dress", cloak:"Transparent Crystal Wrap",
+          flowers:"White Lilies", instruments:"Silver Violin", lashes:"Soft Editorial Lashes", butterflies:"Moonlit Butterflies",
+          elements:"Glass Refractions", accessories:"Crystal Collar", hairEdges:"Minimal Sleek Edges", skinTone:"Soft Caramel",
+          backgroundScene:"Floating Museum Gallery", poseStyle:"Museum-Still Pose",
+          shotType:"Iconic Cover Shot", cameraAngle:"Straight-On", lens:"90mm portrait lens", framing:"Perfect Symmetry", motion:"Static Hero Shot",
+          keyLight:"Moonlit Key", fillLight:"Pearl Fill", rimLight:"Moon White Rim", shadowStyle:"Silver Mist Shadows"
+        },
+        sliders:{lightIntensity:69, contrastLevel:58, shadowDepth:50, shadowSoftness:68, glowAmount:65, reflectionAmount:52, particleDensity:46, backgroundComplexity:64}
+      },
+      {
+        name:"5. Gilded Storm",
+        values:{
+          eyeColor:"Amber", hairStyle:"Braided Updo", ethnicity:"Ghanaian", hairColor:"Mahogany", hat:"Gold Leaf Crown",
+          hairGems:"Gold Hair Rings", shoes:"Gold Platform Heels", outfit:"Metallic Corset Gown", cloak:"Metallic Winged Cape",
+          flowers:"Black Dahlias", instruments:"Trumpet", lashes:"Dramatic Cat-Eye Lashes", butterflies:"Gold Butterflies",
+          elements:"Lightning Threads", accessories:"Gold Bangles", hairEdges:"Sharp Sculpted Edges", skinTone:"Ebony Gold",
+          backgroundScene:"Gilded Moon Hall", poseStyle:"Wide Stance Power",
+          shotType:"Monumental Front Shot", cameraAngle:"Extreme Low Angle", lens:"35mm lens", framing:"Hero Center Composition", motion:"Golden Sparks Swirling",
+          keyLight:"Golden Spotlight", fillLight:"Warm Fill", rimLight:"Amber Rim Light", shadowStyle:"High-Contrast Shadows"
+        },
+        sliders:{lightIntensity:86, contrastLevel:84, shadowDepth:80, shadowSoftness:26, glowAmount:68, reflectionAmount:70, particleDensity:76, backgroundComplexity:80}
+      },
+      {
+        name:"6. Velvet Cosmos",
+        values:{
+          eyeColor:"Indigo", hairStyle:"Wet Look Waves", ethnicity:"Trinidadian", hairColor:"Midnight Blue", hat:"Sequined Hood",
+          hairGems:"Iridescent Beads", shoes:"Mirror Heels", outfit:"Satin Blazer Dress", cloak:"Shadow Silk Mantle",
+          flowers:"Lavender Blossoms", instruments:"Saxophone", lashes:"Wet Look Lashes", butterflies:"Velvet Indigo Butterflies",
+          elements:"Velvet Darkness", accessories:"Cocktail Ring", hairEdges:"Wet Shine Edges", skinTone:"Walnut Brown",
+          backgroundScene:"Velvet Cosmos Room", poseStyle:"Torso Twist",
+          shotType:"Three-Quarter Portrait", cameraAngle:"Diagonal Front Right", lens:"55mm lens", framing:"Off-Center Right", motion:"Smoke Curling",
+          keyLight:"Low-Key Spotlight", fillLight:"Subtle Cool Fill", rimLight:"Blue Rim Light", shadowStyle:"Moody Velvet Shadows"
+        },
+        sliders:{lightIntensity:61, contrastLevel:82, shadowDepth:83, shadowSoftness:33, glowAmount:52, reflectionAmount:58, particleDensity:55, backgroundComplexity:71}
+      },
+      {
+        name:"7. Floral Oracle",
+        values:{
+          eyeColor:"Honey", hairStyle:"Half-Up Half-Down", ethnicity:"Ethiopian", hairColor:"Warm Brown", hat:"Floral Halo",
+          hairGems:"Floral Crystal Pins", shoes:"Jeweled Sandals", outfit:"Draped Silk Dress", cloak:"Rose Petal Train",
+          flowers:"Peonies", instruments:"Flute", lashes:"Classic Flutter Lashes", butterflies:"Pearl Butterflies",
+          elements:"Liquid Light", accessories:"Layered Necklaces", hairEdges:"Soft Brushed Edges", skinTone:"Honey Bronze",
+          backgroundScene:"Luminous Floral Chamber", poseStyle:"Graceful Lean",
+          shotType:"Waist-Up Shot", cameraAngle:"Slightly High Front", lens:"60mm lens", framing:"Rule of Thirds Left", motion:"Petals Drifting",
+          keyLight:"Soft Window Glow", fillLight:"White Bounce Fill", rimLight:"Pearl Rim", shadowStyle:"Luminous Soft Shadows"
+        },
+        sliders:{lightIntensity:72, contrastLevel:54, shadowDepth:43, shadowSoftness:76, glowAmount:74, reflectionAmount:44, particleDensity:60, backgroundComplexity:69}
+      },
+      {
+        name:"8. Crystal Timekeeper",
+        values:{
+          eyeColor:"Ice Blue", hairStyle:"High Bun", ethnicity:"Kenyan", hairColor:"Soft Black", hat:"Jeweled Circlet",
+          hairGems:"Crystal Constellations", shoes:"Chrome Heels", outfit:"Chrome Bodysuit", cloak:"Crystal Smoke Cape",
+          flowers:"Silver Petals", instruments:"Crystal Chimes", lashes:"Starburst Lashes", butterflies:"Crystal Butterflies",
+          elements:"Prism Flares", accessories:"Ear Cuffs", hairEdges:"Crystal-Lined Edges", skinTone:"Cool Espresso",
+          backgroundScene:"Crystal Observatory", poseStyle:"Centered Command",
+          shotType:"Full Body Hero Shot", cameraAngle:"Eye Level", lens:"Cinematic prime lens", framing:"Centered Symmetry", motion:"Clock Glow Pulse",
+          keyLight:"Prism Light", fillLight:"Chrome Reflect Fill", rimLight:"Chrome Rim Light", shadowStyle:"Glossy Reflective Shadows"
+        },
+        sliders:{lightIntensity:77, contrastLevel:70, shadowDepth:63, shadowSoftness:46, glowAmount:79, reflectionAmount:84, particleDensity:59, backgroundComplexity:77}
+      },
+      {
+        name:"9. Runway Constellation",
+        values:{
+          eyeColor:"Emerald", hairStyle:"Sleek High Ponytail", ethnicity:"South African", hairColor:"Espresso", hat:"Orbital Headpiece",
+          hairGems:"Celestial Chains", shoes:"Strappy Gold Heels", outfit:"Couture Tailored Suit", cloak:"Structured Cape",
+          flowers:"Orchids", instruments:"Vintage Microphone", lashes:"Thick Couture Lashes", butterflies:"Galaxy Butterflies",
+          elements:"Orbital Streaks", accessories:"Shoulder Jewelry", hairEdges:"Statement Swoops", skinTone:"Bronze Cocoa",
+          backgroundScene:"Starfall Runway", poseStyle:"Runway Walk",
+          shotType:"Runway Mid Shot", cameraAngle:"Stage-Level Front", lens:"75mm lens", framing:"Runway Centering", motion:"Walking Forward",
+          keyLight:"Focused High Key", fillLight:"Editorial Fill", rimLight:"Star Rim", shadowStyle:"Editorial Contrast Shadows"
+        },
+        sliders:{lightIntensity:84, contrastLevel:73, shadowDepth:60, shadowSoftness:48, glowAmount:61, reflectionAmount:67, particleDensity:51, backgroundComplexity:70}
+      },
+      {
+        name:"10. Sacred Halo",
+        values:{
+          eyeColor:"Pearl Gray", hairStyle:"Afro Crown", ethnicity:"Nubian", hairColor:"Onyx", hat:"Sunburst Halo",
+          hairGems:"Wire Halo Details", shoes:"Barefoot with Gold Anklets", outfit:"Celestial Ball Gown", cloak:"Celestial Mantle",
+          flowers:"Lotus Flowers", instruments:"Lyre", lashes:"Open Eye Lashes", butterflies:"Celestial Butterflies",
+          elements:"Halo Rays", accessories:"Arm Cuffs", hairEdges:"Halo Sweep Edges", skinTone:"Deep Cocoa",
+          backgroundScene:"Celestial Cathedral", poseStyle:"Upward Gaze",
+          shotType:"Aerial Hero Shot", cameraAngle:"Slightly Low Front", lens:"24mm wide lens", framing:"Cathedral Symmetry", motion:"Halo Expansion",
+          keyLight:"Heavenly Overhead Glow", fillLight:"Soft Gold Fill", rimLight:"Radiant Rim", shadowStyle:"Volumetric Shadows"
+        },
+        sliders:{lightIntensity:88, contrastLevel:57, shadowDepth:47, shadowSoftness:73, glowAmount:88, reflectionAmount:50, particleDensity:70, backgroundComplexity:85}
+      },
+      {
+        name:"11. Noir Clock Diva",
+        values:{
+          eyeColor:"Black", hairStyle:"Sleek Bob", ethnicity:"African American", hairColor:"Jet Black", hat:"Vintage Cloche",
+          hairGems:"Rhinestone Veil", shoes:"Pointed Pumps", outfit:"Velvet Corset Dress", cloak:"Billowing Velvet Cloak",
+          flowers:"Black Dahlias", instruments:"Cello", lashes:"Piecey Glam Lashes", butterflies:"Black Velvet Butterflies",
+          elements:"Clockwork Sparks", accessories:"Opera Gloves", hairEdges:"Classic Sleek Edges", skinTone:"Rich Sable",
+          backgroundScene:"Victorian Time Palace", poseStyle:"Looking Back",
+          shotType:"Profile Portrait", cameraAngle:"Side Right", lens:"105mm portrait lens", framing:"Image Heavy Left", motion:"Slow Pan Left",
+          keyLight:"Editorial Hard Key", fillLight:"Low Fill", rimLight:"Rear White Rim", shadowStyle:"Noir Shadows"
+        },
+        sliders:{lightIntensity:58, contrastLevel:88, shadowDepth:86, shadowSoftness:24, glowAmount:36, reflectionAmount:42, particleDensity:48, backgroundComplexity:73}
+      },
+      {
+        name:"12. Aurora Flame",
+        values:{
+          eyeColor:"Rose Gold", hairStyle:"Curly High Ponytail", ethnicity:"Brazilian Afro-descendant", hairColor:"Crimson", hat:"Feathered Fascinator",
+          hairGems:"Rose Crystal Pins", shoes:"Feathered Heels", outfit:"Crystal Fringe Gown", cloak:"Shimmer Chiffon Cape",
+          flowers:"Coral Peonies", instruments:"Guitar", lashes:"Spiked Glam Lashes", butterflies:"Ember Butterflies",
+          elements:"Comet Trails", accessories:"Wrist Cuffs", hairEdges:"Double Swoop Edges", skinTone:"Warm Cocoa",
+          backgroundScene:"Theater of Constellations", poseStyle:"Swirling Dress Motion",
+          shotType:"Heroic Stage Shot", cameraAngle:"Diagonal Front Left", lens:"40mm lens", framing:"Diagonal Energy", motion:"Dress Flowing",
+          keyLight:"Firelit Glow", fillLight:"Warm Fill", rimLight:"Fiery Rim Light", shadowStyle:"Carved Shadows"
+        },
+        sliders:{lightIntensity:79, contrastLevel:77, shadowDepth:67, shadowSoftness:39, glowAmount:83, reflectionAmount:62, particleDensity:72, backgroundComplexity:79}
+      },
+      {
+        name:"13. Silver Bloom",
+        values:{
+          eyeColor:"Gray", hairStyle:"Pinned Curls", ethnicity:"Barbadian", hairColor:"Silver", hat:"Pearl Halo",
+          hairGems:"Pearl Sprays", shoes:"Pearl Heels", outfit:"Ruffled Couture Dress", cloak:"Pearl Mesh Drape",
+          flowers:"Magnolias", instruments:"Oboe", lashes:"Whisper Lashes", butterflies:"Silver Butterflies",
+          elements:"Silver Glitter", accessories:"Pearl Collar", hairEdges:"Vintage Curl Edges", skinTone:"Soft Bronze",
+          backgroundScene:"Moonlit Marble Room", poseStyle:"Soft Contrapposto",
+          shotType:"Shoulder-Up Portrait", cameraAngle:"Three-Quarter Right", lens:"100mm macro lens", framing:"Frame Within Frame", motion:"Subtle Zoom",
+          keyLight:"Even Beauty Light", fillLight:"Pearl Fill", rimLight:"Silver Rim Light", shadowStyle:"Pearlescent Shadows"
+        },
+        sliders:{lightIntensity:67, contrastLevel:51, shadowDepth:41, shadowSoftness:80, glowAmount:71, reflectionAmount:46, particleDensity:40, backgroundComplexity:60}
+      },
+      {
+        name:"14. Starlight Commander",
+        values:{
+          eyeColor:"Topaz", hairStyle:"Fulani Braids", ethnicity:"Senegalese", hairColor:"Golden Bronze", hat:"Starburst Crown",
+          hairGems:"Sunburst Pins", shoes:"Blade Heels", outfit:"Armored Corset Gown", cloak:"Royal Brocade Cloak",
+          flowers:"Star Lilies", instruments:"French Horn", lashes:"Full Volume Lashes", butterflies:"Star Butterflies",
+          elements:"Starbursts", accessories:"Finger Armor", hairEdges:"Temple Spiral Edges", skinTone:"Warm Mahogany",
+          backgroundScene:"Royal Starlight Room", poseStyle:"Wide Stance Power",
+          shotType:"Heroic Stage Shot", cameraAngle:"Under-Chin Hero Angle", lens:"35mm lens", framing:"Subject Dominant Center", motion:"Light Sweep",
+          keyLight:"Starbeam Light", fillLight:"Gold Bounce Fill", rimLight:"Soft Gold Rim", shadowStyle:"Sculpted Face Shadows"
+        },
+        sliders:{lightIntensity:85, contrastLevel:79, shadowDepth:72, shadowSoftness:34, glowAmount:75, reflectionAmount:69, particleDensity:63, backgroundComplexity:76}
+      },
+      {
+        name:"15. Dream of Time",
+        values:{
+          eyeColor:"Lavender", hairStyle:"Loose Waves", ethnicity:"East African", hairColor:"Lavender Black", hat:"Draped Veil Headpiece",
+          hairGems:"Aurora Crystals", shoes:"Satin Heels", outfit:"Wrapped Silk Gown", cloak:"Moonlit Veil",
+          flowers:"Anemones", instruments:"Violin", lashes:"Luxe Flutter Lashes", butterflies:"Aurora Butterflies",
+          elements:"Cosmic Mist", accessories:"Cascading Earrings", hairEdges:"Petal Swirl Edges", skinTone:"Caramel Glow",
+          backgroundScene:"Whispering Light Hall", poseStyle:"Graceful Lean",
+          shotType:"Wide Environmental Shot", cameraAngle:"Slightly High Front", lens:"65mm medium telephoto", framing:"Spiral Eye Flow", motion:"Camera Drift",
+          keyLight:"Lunar Glow", fillLight:"Lavender Fill", rimLight:"Opal Rim", shadowStyle:"Airy Shadows"
+        },
+        sliders:{lightIntensity:73, contrastLevel:55, shadowDepth:45, shadowSoftness:74, glowAmount:84, reflectionAmount:57, particleDensity:66, backgroundComplexity:81}
+      }
+    ];
+
+    function createSelectField(container, id, label, options){
+      const wrap = document.createElement("div");
+      wrap.className = "field";
+      const lab = document.createElement("label");
+      lab.setAttribute("for", id);
+      lab.textContent = label;
+      const select = document.createElement("select");
+      select.id = id;
+
+      options.forEach(opt=>{
+        const o = document.createElement("option");
+        o.value = opt;
+        o.textContent = opt;
+        select.appendChild(o);
+      });
+
+      wrap.appendChild(lab);
+      wrap.appendChild(select);
+      container.appendChild(wrap);
+    }
+
+    function createRangeField(container, cfg){
+      const wrap = document.createElement("div");
+      wrap.className = "field";
+      const lab = document.createElement("label");
+      lab.setAttribute("for", cfg.id);
+      lab.textContent = cfg.label;
+      const rangeWrap = document.createElement("div");
+      rangeWrap.className = "range-wrap";
+      const input = document.createElement("input");
+      input.type = "range";
+      input.id = cfg.id;
+      input.min = cfg.min;
+      input.max = cfg.max;
+      input.value = cfg.value;
+
+      const val = document.createElement("div");
+      val.className = "range-value";
+      val.id = cfg.id + "Val";
+      val.textContent = cfg.value;
+
+      input.addEventListener("input", ()=>{ val.textContent = input.value; });
+      rangeWrap.appendChild(input);
+      rangeWrap.appendChild(val);
+      wrap.appendChild(lab);
+      wrap.appendChild(rangeWrap);
+      container.appendChild(wrap);
+    }
+
+    function initUI(){
+      const dynamicFields = document.getElementById("dynamicFields");
+      fieldsConfig.forEach(f=> createSelectField(dynamicFields, f.id, f.label, dropdownData[f.id]));
+
+      const cameraFields = document.getElementById("cameraFields");
+      cameraFieldsConfig.forEach(f=> createSelectField(cameraFields, f.id, f.label, cameraData[f.id]));
+
+      const lightingFields = document.getElementById("lightingFields");
+      lightingFieldsConfig.forEach(f=> createSelectField(lightingFields, f.id, f.label, lightingData[f.id]));
+      sliderConfig.forEach(cfg => createRangeField(cameraFields, cfg));
+
+      const presetSelect = document.getElementById("presetSelect");
+      presets.forEach((preset, idx)=>{
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = preset.name;
+        presetSelect.appendChild(opt);
+      });
+    }
+
+    function getVal(id){
+      return document.getElementById(id).value;
+    }
+
+    function setVal(id, value){
+      const el = document.getElementById(id);
+      if(el) el.value = value;
+      const rangeVal = document.getElementById(id + "Val");
+      if(rangeVal) rangeVal.textContent = value;
+    }
+
+    function randomFrom(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function randomNonNone(options){
+      const pool = options.filter(x => x !== NONE);
+      return randomFrom(pool);
+    }
+
+    function clearAll(){
+      fieldsConfig.forEach(f => setVal(f.id, NONE));
+      cameraFieldsConfig.forEach(f => setVal(f.id, NONE));
+      lightingFieldsConfig.forEach(f => setVal(f.id, NONE));
+      sliderConfig.forEach(s => setVal(s.id, s.value));
+      setVal("subjectMatter", "Fantasy Glamour");
+      setVal("outputMode", "Generate Both");
+      setVal("aspectRatio", "9:16 vertical");
+      setVal("duration", 8);
+      document.getElementById("customNotes").value = "";
+      document.getElementById("photoOutput").value = "";
+      document.getElementById("videoOutput").value = "";
+      document.getElementById("photoMeta").textContent = "Cleared";
+      document.getElementById("videoMeta").textContent = "Cleared";
+    }
+
+    function randomizeAll(){
+      fieldsConfig.forEach(f => setVal(f.id, randomNonNone(dropdownData[f.id])));
+      cameraFieldsConfig.forEach(f => setVal(f.id, randomNonNone(cameraData[f.id])));
+      lightingFieldsConfig.forEach(f => setVal(f.id, randomNonNone(lightingData[f.id])));
+      sliderConfig.forEach(s => {
+        const val = Math.floor(Math.random() * (parseInt(s.max) - parseInt(s.min) + 1)) + parseInt(s.min);
+        setVal(s.id, val);
+      });
+
+      const subjectThemes = ["Fantasy Glamour", "Celestial Couture", "Cosmic Romance", "Museum Masterpiece", "Mythic Stage Presence", "Surreal Time Goddess"];
+      const aspectRatios = ["9:16 vertical", "4:5 portrait", "1:1 square", "16:9 widescreen", "A4 poster portrait", "Magazine cover vertical"];
+      const outputModes = ["Generate Both", "Photo Prompt Only", "Video Prompt Only"];
+
+      setVal("subjectMatter", randomFrom(subjectThemes));
+      setVal("aspectRatio", randomFrom(aspectRatios));
+      setVal("outputMode", randomFrom(outputModes));
+      setVal("duration", Math.floor(Math.random() * 8) + 6);
+    }
+
+    function applyPreset(index){
+      const preset = presets[index];
+      if(!preset) return;
+      Object.entries(preset.values).forEach(([key,val]) => setVal(key,val));
+      Object.entries(preset.sliders).forEach(([key,val]) => setVal(key,val));
+    }
+
+    function maybeLine(label, value){
+      return value && value !== NONE ? `${label}: ${value}.` : "";
+    }
+
+    function buildBackground(theme, scene, complexity, elements, butterflies, flowers, instruments){
+      const complexityText =
+        complexity > 80 ? "The background should be richly layered, dense, immersive, and visually explosive without losing subject clarity."
+        : complexity > 60 ? "The background should feel lush, dimensional, and cinematic with strong depth and supporting fantasy detail."
+        : complexity > 40 ? "The background should remain elegant, atmospheric, and refined with a balanced amount of fantasy detail."
+        : "The background should stay minimal, polished, and controlled while preserving the celestial glamour mood.";
+
+      return `
+Background and environment:
+Use a ${theme.toLowerCase()} visual world with a ${scene !== NONE ? scene.toLowerCase() : "luxury celestial chamber"} that suits the subject matter. 
+Behind the subject, create a monumental antique-style clock with Roman numerals and a luminous silver-white floral core, symbolizing time, destiny, transformation, and divine feminine power.
+Integrate glossy black reflective flooring, dimensional atmospheric depth, cosmic midnight tones, and premium gallery-scale composition.
+${elements !== NONE ? `Feature ${elements.toLowerCase()} moving through the environment.` : ""}
+${butterflies !== NONE ? `Include ${butterflies.toLowerCase()} to symbolize transformation and living motion.` : ""}
+${flowers !== NONE ? `Place oversized ${flowers.toLowerCase()} around the lower and side edges of the composition with luminous detail.` : ""}
+${instruments !== NONE ? `Incorporate ${instruments.toLowerCase()} as a surreal musical or symbolic design element.` : ""}
+${complexityText}
+      `.trim();
+    }
+
+    function buildPhotoPrompt(){
+      const subjectMatter = getVal("subjectMatter");
+      const aspectRatio = getVal("aspectRatio");
+      const customNotes = document.getElementById("customNotes").value.trim();
+
+      const selections = Object.fromEntries(fieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const camera = Object.fromEntries(cameraFieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const lighting = Object.fromEntries(lightingFieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const sliders = Object.fromEntries(sliderConfig.map(s => [s.id, getVal(s.id)]));
+
+      const faceVariant = randomFrom(distinctFaceDescriptors);
+      const poseVariant = randomFrom(distinctPoseDescriptors);
+      const stylingVariant = randomFrom(distinctStylingDescriptors);
+
+      const backgroundBlock = buildBackground(
+        subjectMatter,
+        selections.backgroundScene,
+        Number(sliders.backgroundComplexity),
+        selections.elements,
+        selections.butterflies,
+        selections.flowers,
+        selections.instruments
+      );
+
+      const prompt = `
+Create an ultra-dramatic, gallery-worthy fantasy glamour portrait that blends luxury fashion illustration, surreal celestial art, high-end digital painting, Afrofuturist elegance, cinematic editorial beauty, and museum-worthy concept art.
+
+Main subject:
+Feature a striking glamorous Black woman as the undeniable focal point of the composition.
+${maybeLine("Ethnicity inspiration", selections.ethnicity)}
+${maybeLine("Skin tone", selections.skinTone)}
+${maybeLine("Eye color", selections.eyeColor)}
+Her face should be uniquely distinct in this render, with ${faceVariant}. She should have radiant polished skin, sculpted cheekbones, glossy full lips, and a powerful, poised, seductive, self-assured editorial expression.
+
+Hair and beauty:
+${maybeLine("Hairstyle", selections.hairStyle)}
+${maybeLine("Hair color", selections.hairColor)}
+${maybeLine("Hair gems", selections.hairGems)}
+${maybeLine("Hair edges", selections.hairEdges)}
+${maybeLine("Lashes", selections.lashes)}
+Beauty styling should feel luxurious, hyper-polished, and high-fashion with strong gallery impact.
+
+Wardrobe and styling:
+${maybeLine("Hat or headpiece", selections.hat)}
+${maybeLine("Outfit", selections.outfit)}
+${maybeLine("Cloak or train", selections.cloak)}
+${maybeLine("Shoes", selections.shoes)}
+${maybeLine("Accessories", selections.accessories)}
+Use a fresh styling direction for this render with ${stylingVariant}. The overall look must remain regal, couture, powerful, expensive, and unforgettable.
+
+Pose and body language:
+${maybeLine("Pose style", selections.poseStyle)}
+Use a uniquely distinct pose variation in this render with ${poseVariant}. The subject should radiate confidence, elegance, feminine power, and commanding presence like the centerpiece of an elite museum exhibition.
+
+${backgroundBlock}
+
+Lighting and shadows:
+${maybeLine("Key light", lighting.keyLight)}
+${maybeLine("Fill light", lighting.fillLight)}
+${maybeLine("Rim light", lighting.rimLight)}
+${maybeLine("Shadow style", lighting.shadowStyle)}
+Use cinematic celestial lighting with brilliant highlights, luminous rim separation, sculpted facial light, atmospheric glow, sparkling star flares, rich polished reflections, and a luxury editorial finish.
+Light intensity: ${sliders.lightIntensity}/100.
+Contrast level: ${sliders.contrastLevel}/100.
+Shadow depth: ${sliders.shadowDepth}/100.
+Shadow softness: ${sliders.shadowSoftness}/100.
+Glow and bloom: ${sliders.glowAmount}/100.
+Reflection amount: ${sliders.reflectionAmount}/100.
+Particle density: ${sliders.particleDensity}/100.
+
+Camera and composition:
+${maybeLine("Shot type", camera.shotType)}
+${maybeLine("Camera angle", camera.cameraAngle)}
+${maybeLine("Lens", camera.lens)}
+${maybeLine("Framing", camera.framing)}
+The image should be composed for ${aspectRatio}, with a premium fine-art editorial finish and strong visual hierarchy that keeps the woman dominant in the frame.
+
+Color palette:
+Deep black, metallic gold, silver-white, electric blue, violet, lavender, blush pink, coral, and cosmic midnight tones. The palette should feel rich, luminous, mystical, glamorous, and visually explosive.
+
+Mandatory variation rule:
+Each render must feature a uniquely distinct face, pose, and styling arrangement while preserving the same overall fantasy glamour universe, celestial luxury mood, Afrocentric elegance, and high-end editorial polish.
+
+Rendering quality:
+Extremely high detail, sharp focus on subject, polished skin rendering, realistic fabric folds, luminous metallic textures, complex layered composition, rich atmospheric depth, glowing particle effects, premium fantasy realism, masterpiece quality, award-winning digital art, gallery showstopper.
+
+${customNotes ? `Custom direction:\n${customNotes}` : ""}
+      `.trim().replace(/\n{3,}/g, "\n\n");
+
+      return {
+        prompt,
+        meta:`${aspectRatio} • ${subjectMatter} • distinct face/pose/styling enabled`
+      };
+    }
+
+    function buildVideoPrompt(){
+      const subjectMatter = getVal("subjectMatter");
+      const aspectRatio = getVal("aspectRatio");
+      const duration = getVal("duration");
+      const customNotes = document.getElementById("customNotes").value.trim();
+
+      const selections = Object.fromEntries(fieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const camera = Object.fromEntries(cameraFieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const lighting = Object.fromEntries(lightingFieldsConfig.map(f => [f.id, getVal(f.id)]));
+      const sliders = Object.fromEntries(sliderConfig.map(s => [s.id, getVal(s.id)]));
+
+      const faceVariant = randomFrom(distinctFaceDescriptors);
+      const poseVariant = randomFrom(distinctPoseDescriptors);
+      const stylingVariant = randomFrom(distinctStylingDescriptors);
+
+      const motion = camera.motion !== NONE ? camera.motion : "slow cinematic motion";
+      const scene = selections.backgroundScene !== NONE ? selections.backgroundScene : "celestial time chamber";
+
+      const prompt = `
+Create a cinematic fantasy glamour video prompt for a ${duration}-second sequence in ${aspectRatio}.
+
+Core concept:
+A gallery-worthy, ultra-dramatic ${subjectMatter.toLowerCase()} visual featuring a glamorous Black woman as the central masterpiece. The aesthetic should blend luxury fashion cinema, surreal celestial art, Afrofuturist elegance, premium digital beauty styling, and museum-level fantasy spectacle.
+
+Character direction:
+The woman should have ${selections.skinTone !== NONE ? selections.skinTone.toLowerCase() : "radiant deep brown"} skin, ${selections.eyeColor !== NONE ? selections.eyeColor.toLowerCase() : "luminous expressive"} eyes, and a uniquely distinct face for this render with ${faceVariant}.
+${selections.ethnicity !== NONE ? `Ethnicity inspiration: ${selections.ethnicity}.` : ""}
+${selections.hairStyle !== NONE ? `Hair: ${selections.hairStyle.toLowerCase()}.` : ""}
+${selections.hairColor !== NONE ? `Hair color: ${selections.hairColor.toLowerCase()}.` : ""}
+${selections.hat !== NONE ? `Headpiece: ${selections.hat.toLowerCase()}.` : ""}
+${selections.hairGems !== NONE ? `Hair details: ${selections.hairGems.toLowerCase()}.` : ""}
+${selections.lashes !== NONE ? `Lashes: ${selections.lashes.toLowerCase()}.` : ""}
+${selections.hairEdges !== NONE ? `Hair edges: ${selections.hairEdges.toLowerCase()}.` : ""}
+
+Wardrobe:
+${selections.outfit !== NONE ? `Outfit: ${selections.outfit.toLowerCase()}.` : ""}
+${selections.cloak !== NONE ? `Cloak or train: ${selections.cloak.toLowerCase()}.` : ""}
+${selections.shoes !== NONE ? `Shoes: ${selections.shoes.toLowerCase()}.` : ""}
+${selections.accessories !== NONE ? `Accessories: ${selections.accessories.toLowerCase()}.` : ""}
+Use ${stylingVariant} so this version looks singular and collectible.
+
+Environment:
+Set the video in a ${scene.toLowerCase()} with an enormous antique clock, Roman numerals, luminous silver-white floral center, glossy black reflective floor, cosmic midnight atmosphere, and rich celestial depth.
+${selections.flowers !== NONE ? `Feature oversized ${selections.flowers.toLowerCase()} framing the composition.` : ""}
+${selections.butterflies !== NONE ? `Include ${selections.butterflies.toLowerCase()} moving gracefully through the scene.` : ""}
+${selections.elements !== NONE ? `Add ${selections.elements.toLowerCase()} to intensify the magic, motion, and dimensionality.` : ""}
+${selections.instruments !== NONE ? `Use ${selections.instruments.toLowerCase()} as a surreal musical storytelling element.` : ""}
+
+Camera direction:
+${camera.shotType !== NONE ? `Shot type: ${camera.shotType}.` : ""}
+${camera.cameraAngle !== NONE ? `Camera angle: ${camera.cameraAngle}.` : ""}
+${camera.lens !== NONE ? `Lens: ${camera.lens}.` : ""}
+${camera.framing !== NONE ? `Framing: ${camera.framing}.` : ""}
+Primary motion: ${motion}.
+The camera language should feel premium, deliberate, elegant, and cinematic.
+
+Lighting and shadow:
+${lighting.keyLight !== NONE ? `Key light: ${lighting.keyLight}.` : ""}
+${lighting.fillLight !== NONE ? `Fill light: ${lighting.fillLight}.` : ""}
+${lighting.rimLight !== NONE ? `Rim light: ${lighting.rimLight}.` : ""}
+${lighting.shadowStyle !== NONE ? `Shadow style: ${lighting.shadowStyle}.` : ""}
+Light intensity ${sliders.lightIntensity}/100, contrast ${sliders.contrastLevel}/100, shadow depth ${sliders.shadowDepth}/100, shadow softness ${sliders.shadowSoftness}/100, glow ${sliders.glowAmount}/100, reflections ${sliders.reflectionAmount}/100, particle density ${sliders.particleDensity}/100.
+
+Performance beat sheet:
+Opening (0–2 sec):
+Reveal the environment first with a majestic cinematic entrance of the clock, reflective floor, ambient particles, and glowing fantasy details.
+
+Middle (2–5 sec):
+Bring focus to the woman as she holds a uniquely distinct pose with ${poseVariant}. Let fabric, light, butterflies, petals, and atmospheric particles move around her with precision and beauty.
+
+Climax (5–${duration} sec):
+Push into a show-stopping hero moment where the subject fully owns the frame like the greatest piece in the gallery. Intensify the celestial glow, reflections, and symbolic elements while keeping the composition elegant, clear, and expensive.
+
+Mandatory variation rule:
+Each video render must feature a uniquely distinct face, pose, and styling arrangement while preserving the same luxury celestial fantasy universe and high-end editorial glamour aesthetic.
+
+Visual finish:
+Ultra-detailed, cinematic, polished, surreal, feminine, commanding, magical, unforgettable, masterpiece-level, award-winning fantasy fashion cinema.
+
+${customNotes ? `Custom direction:\n${customNotes}` : ""}
+      `.trim().replace(/\n{3,}/g, "\n\n");
+
+      return {
+        prompt,
+        meta:`${duration}s • ${aspectRatio} • ${motion !== NONE ? motion : "cinematic motion"}`
+      };
+    }
+
+    function generate(){
+      const mode = getVal("outputMode");
+      const photo = buildPhotoPrompt();
+      const video = buildVideoPrompt();
+
+      const photoOutput = document.getElementById("photoOutput");
+      const videoOutput = document.getElementById("videoOutput");
+      const photoMeta = document.getElementById("photoMeta");
+      const videoMeta = document.getElementById("videoMeta");
+
+      if(mode === "Generate Both" || mode === "Photo Prompt Only"){
+        photoOutput.value = photo.prompt;
+        photoMeta.textContent = photo.meta;
+      } else {
+        photoOutput.value = "";
+        photoMeta.textContent = "Skipped by output mode";
+      }
+
+      if(mode === "Generate Both" || mode === "Video Prompt Only"){
+        videoOutput.value = video.prompt;
+        videoMeta.textContent = video.meta;
+      } else {
+        videoOutput.value = "";
+        videoMeta.textContent = "Skipped by output mode";
+      }
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(err){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        return true;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", ()=>{
+      initUI();
+
+      document.getElementById("generateBtn").addEventListener("click", generate);
+      document.getElementById("randomBtn").addEventListener("click", ()=>{
+        randomizeAll();
+        generate();
+      });
+      document.getElementById("clearBtn").addEventListener("click", clearAll);
+
+      document.getElementById("applyPresetBtn").addEventListener("click", ()=>{
+        applyPreset(Number(document.getElementById("presetSelect").value));
+        generate();
+      });
+
+      document.getElementById("copyPhotoBtn").addEventListener("click", async ()=>{
+        const ok = await copyText(document.getElementById("photoOutput").value);
+        document.getElementById("photoMeta").textContent = ok ? "Photo prompt copied" : "Copy failed";
+      });
+
+      document.getElementById("copyVideoBtn").addEventListener("click", async ()=>{
+        const ok = await copyText(document.getElementById("videoOutput").value);
+        document.getElementById("videoMeta").textContent = ok ? "Video prompt copied" : "Copy failed";
+      });
+
+      document.getElementById("copyBothBtn").addEventListener("click", async ()=>{
+        const combined = `PHOTO PROMPT\n\n${document.getElementById("photoOutput").value}\n\n------------------------------\n\nVIDEO PROMPT\n\n${document.getElementById("videoOutput").value}`;
+        const ok = await copyText(combined);
+        document.getElementById("photoMeta").textContent = ok ? "Both copied" : "Copy failed";
+        document.getElementById("videoMeta").textContent = ok ? "Both copied" : "Copy failed";
+      });
+
+      applyPreset(0);
+      generate();
+    });
+  </script>
+</body>
+</html>
